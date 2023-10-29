@@ -13,15 +13,15 @@ class Clobber
 	Piece _player;
 	int position_to_index(string position)
 	{
-		if(position.size() != 2 || position.at(0) < 'A' || position.at(0) > 'F' || position.at(1) < '1' || position.at(1) > '5')
+		if(position.size() != 2 || position.at(0) < 'A' || position.at(0) > 'E' || position.at(1) < '1' || position.at(1) > '6')
 			throw invalid_argument(position + " is not a valid board position.");
-		return (position.at(0) - 'A') * 5 + position.at(1) - '1';
+		return (position.at(1) - '1') * 5 + position.at(0) - 'A';
 	}
 	string index_to_position(int index)
 	{
-		string from(1, index / 5 + 'A');
-		string to(1, index % 5 + '1');
-		return from + to;
+		string column(1, index % 5 + 'A');
+		string row(1, index / 5 + '1');
+		return column + row;
 	}
 	public:
 		Clobber()
@@ -75,10 +75,10 @@ class Clobber
 		}
 		friend ostream &operator<<(ostream &out, const Clobber &game)
 		{
-			out << "\x1B[1m  1 2 3 4 5" << endl;
+			out << "\x1B[1m  A B C D E" << endl;
 			for(int y = 0; y < 6; y++)
 			{
-				out << "\x1B[1m" << (char)(y + 'A') << " \x1B[0m";
+				out << "\x1B[1m" << (char)(y + '1') << " \x1B[0m";
 				for(int x = 0; x < 5; x++)
 				{
 					switch(game._board[y * 5 + x])

@@ -10,13 +10,13 @@ T pmcgs(T state, int ms)
 {
 	map<T, int> wins;
 	int simulations = 0;
-	for(auto move: state.possible_moves())
+	for(auto move : state.possible_moves())
 		wins[state.do_move(move)] = 0;
 	mt19937 generator(std::random_device{}());
 	auto start = chrono::high_resolution_clock::now();
 	while(chrono::duration<double, std::milli>(chrono::high_resolution_clock::now() - start).count() < ms)
 	{
-		for(auto &[key, value]: wins)
+		for(auto &[key, value] : wins)
 		{
 			T new_state = key;
 			while(!new_state.winner())
