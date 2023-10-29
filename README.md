@@ -4,9 +4,9 @@ A C++ library implementing [Pure Monte Carlo Game Search](https://en.wikipedia.o
 # How to use
 Simply include pmcgs.hpp in your .cpp files.
 
-The class used as the 1st parameter to the pmcgs function needs a few methods implemented:
+The class used as the template parameter to the pmcgs function needs a few methods implemented:
 - int player(): Returns the current player.
-- T do_move(auto move): Makes the given move and returns the new game state. Does not modify the invoking object.
+- T do_move(auto move): Makes the given move and returns the new game state. Should not modify the invoking object.
 - auto possible_moves(): Returns all the possible moves the current player can make.
 - int winner(): Returns 0 if nobody has won the game, otherwise the number of the player who won.
 - bool operator<(T rhs): Needed so it can be used as a key to a map.
