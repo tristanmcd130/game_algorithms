@@ -31,7 +31,7 @@ T pmcgs(T state, int ms)
 		simulations++;
 	}
 	T best_state = wins.begin()->first;
-	for(auto &[key, value]: wins)
+	for(auto &[key, value] : wins)
 	{
 		if(value > wins[best_state])
 			best_state = key;
