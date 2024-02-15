@@ -1,40 +1,42 @@
+#pragma once
+#include <string>
 #include <map>
 #include <random>
 #include <chrono>
 #include <iostream>
 
-using namespace std;
-
-template<typename T>
-T pmcgs(T state, int ms)
+namespace PMCGS
 {
-	map<T, int> wins;
-	int simulations = 0;
-	for(auto move : state.possible_moves())
-		wins[state.do_move(move)] = 0;
-	mt19937 generator(std::random_device{}());
-	auto start = chrono::high_resolution_clock::now();
-	while(chrono::duration<double, std::milli>(chrono::high_resolution_clock::now() - start).count() < ms)
+	template<typename T>
+	std::string pmcgs(const T &game, int ms = 1000)
 	{
-		for(auto &[key, value] : wins)
+		std::map<std::string, int> wins;
+		for(auto move: game.moves())
+			wins[move] = 0;
+		std::mt19937 generator(std::random_device{}());
+		auto start = std::chrono::high_resolution_clock::now();
+		while(std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start).count() < ms)
 		{
-			T new_state = key;
-			while(!new_state.winner())
+			for(auto &[key, value]: wins)
 			{
-				auto moves = new_state.possible_moves();
-				uniform_int_distribution<int> distribution(0, moves.size() - 1);
-				new_state = new_state.do_move(moves.at(distribution(generator)));
+				T new_game = game;
+				new_game.do_move(key);
+				while(!new_game.winner())
+				{
+					auto moves = new_game.moves();
+					std::uniform_int_distribution<int> distribution(0, moves.size() - 1);
+					new_game.do_move(moves.at(distribution(generator)));
+				}
+				if(new_game.winner() == game.player())
+					value++;
 			}
-			if(new_state.winner() == state.player())
-				value++;
 		}
-		simulations++;
+		auto best_move = wins.begin()->first;
+		for(auto &[key, value]: wins)
+		{
+			if(value > wins[best_move])
+				best_move = key;
+		}
+		return best_move;
 	}
-	T best_state = wins.begin()->first;
-	for(auto &[key, value] : wins)
-	{
-		if(value > wins[best_state])
-			best_state = key;
-	}
-	return best_state;
 }

@@ -1,151 +1,84 @@
-#include "pmcgs.hpp"
-#include <iostream>
-#include <vector>
+#include "clobber.hpp"
 #include <algorithm>
+#include <iostream>
 
-using namespace std;
-
-typedef enum {EMPTY, RED, BLUE = -1} Piece;
-
-class Clobber
+namespace Clobber
 {
-	Piece _board[30];
-	Piece _player;
-	int position_to_index(string position)
+	Game::Game(): _player(1)
 	{
-		if(position.size() != 2 || position.at(0) < 'A' || position.at(0) > 'E' || position.at(1) < '1' || position.at(1) > '6')
-			throw invalid_argument(position + " is not a valid board position.");
-		return (position.at(1) - '1') * 5 + position.at(0) - 'A';
+		for(int y = 0; y < 6; y++)
+		{
+			for(int x = 0; x < 5; x++)
+				_board[y][x] = (x + y) % 2 ? -1 : 1;
+		}
 	}
-	string index_to_position(int index)
+	void Game::do_move(const std::string &move)
 	{
-		string column(1, index % 5 + 'A');
-		string row(1, index / 5 + '1');
-		return column + row;
+		std::vector<std::string> legal_moves = moves();
+		if(find(legal_moves.begin(), legal_moves.end(), move) == legal_moves.end())
+			throw std::invalid_argument(move + " is not a valid move.");
+		_board[move.at(2) - 'a'][move.at(3) - '1'] = _player;
+		_board[move.at(0) - 'a'][move.at(1) - '1'] = 0;
+		//std::cout << "Moved from (" << (move.at(0) - 'a') << ", " << (move.at(1) - '1') << ") to (" << (move.at(2) - 'a') << ", " << (move.at(3) - '1') << ")" << std::endl;
+		_player = -_player;
 	}
-	public:
-		Clobber()
+	std::vector<std::string> Game::moves() const
+	{
+		std::vector<std::string> moves;
+		for(int y = 0; y < 6; y++)
 		{
-			for(int i = 0; i < 30; i++)
-				_board[i] = i % 2 ? BLUE : RED;
-			_player = RED;
-		}
-		Piece player()
-		{
-			return _player;
-		}
-		Clobber do_move(string move_string)
-		{
-			Clobber new_game = *this;
-			vector<string> moves = possible_moves();
-			if(find(moves.begin(), moves.end(), move_string) == moves.end())
-				throw invalid_argument(move_string + " is not a valid move.");
-			string from = move_string.substr(0, 2);
-			string to = move_string.substr(2, 2);
-			new_game._board[position_to_index(to)] = _player;
-			new_game._board[position_to_index(from)] = EMPTY;
-			new_game._player = (Piece)(-_player);
-			return new_game;
-		}
-		vector<string> possible_moves()
-		{
-			vector<string> moves;
-			for(int y = 0; y < 6; y++)
+			for(int x = 0; x < 5; x++)
 			{
-				for(int x = 0; x < 5; x++)
+				if(_board[y][x] == _player)
 				{
-					if(_board[y * 5 + x] == _player)
-					{
-						if(y > 0 && _board[(y - 1) * 5 + x] == -_player)
-							moves.push_back(index_to_position(y * 5 + x) + index_to_position((y - 1) * 5 + x));
-						if(y < 5 && _board[(y + 1) * 5 + x] == -_player)
-							moves.push_back(index_to_position(y * 5 + x) + index_to_position((y + 1) * 5 + x));
-						if(x > 0 && _board[y * 5 + (x - 1)] == -_player)
-							moves.push_back(index_to_position(y * 5 + x) + index_to_position(y * 5 + (x - 1)));
-						if(x < 4 && _board[y * 5 + (x + 1)] == -_player)
-							moves.push_back(index_to_position(y * 5 + x) + index_to_position(y * 5 + (x + 1)));
-					}
+					if(y > 0 && _board[y - 1][x] == -_player)
+						moves.push_back(std::string(1, y + 'a') + std::to_string(x + 1) + std::string(1, y - 1 + 'a') + std::to_string(x + 1));
+					if(y < 5 && _board[y + 1][x] == -_player)
+						moves.push_back(std::string(1, y + 'a') + std::to_string(x + 1) + std::string(1, y + 1 + 'a') + std::to_string(x + 1));
+					if(x > 0 && _board[y][x - 1] == -_player)
+						moves.push_back(std::string(1, y + 'a') + std::to_string(x + 1) + std::string(1, y + 'a') + std::to_string(x));
+					if(x < 4 && _board[y][x + 1] == -_player)
+						moves.push_back(std::string(1, y + 'a') + std::to_string(x + 1) + std::string(1, y + 'a') + std::to_string(x + 2));
 				}
 			}
-			return moves;
 		}
-		Piece winner()
+		//for(auto move: moves)
+		//	std::cout << move << std::endl;
+		return moves;
+	}
+	int Game::player() const
+	{
+		return _player;
+	}
+	int Game::winner() const
+	{
+		return moves().size() > 0 ? 0 : -_player;
+	}
+	std::ostream &operator<<(std::ostream &out, const Game &game)
+	{
+		out << "\x1B[1m  1 2 3 4 5" << std::endl;
+		for(int y = 0; y < 6; y++)
 		{
-			return possible_moves().size() ? EMPTY : (Piece)(-_player);
-		}
-		friend ostream &operator<<(ostream &out, const Clobber &game)
-		{
-			out << "\x1B[1m  A B C D E" << endl;
-			for(int y = 0; y < 6; y++)
+			out << "\x1B[1m" << std::string(1, y + 'a') << " \x1B[0m";
+			for(int x = 0; x < 5; x++)
 			{
-				out << "\x1B[1m" << (char)(y + '1') << " \x1B[0m";
-				for(int x = 0; x < 5; x++)
+				switch(game._board[y][x])
 				{
-					switch(game._board[y * 5 + x])
-					{
-						case EMPTY:
-							out << "\x1B[0m.";
-							break;
-						case RED:
-							out << "\x1B[31mO";
-							break;
-						case BLUE:
-							out << "\x1B[34mO";
-							break;
-					}
-					if(x % 5 != 4)
-						out << " ";
+					case 0:
+						out << "\x1B[0m.";
+						break;
+					case 1:
+						out << "\x1B[31mO";
+						break;
+					case -1:
+						out << "\x1B[34mO";
+						break;
 				}
-				out << "\x1B[0m" << endl;
+				if(x % 5 != 4)
+					out << " ";
 			}
-			return out;
+			out << "\x1B[0m" << std::endl;
 		}
-		bool operator<(const Clobber &rhs) const
-		{
-			for(int i = 0; i < 30; i++)
-			{
-				if(_board[i] != rhs._board[i])
-					return _board[i] < rhs._board[i];
-			}
-			return false;
-		}
-};
-
-int main()
-{
-	int players;
-	cout << "How many players? (1 or 2): ";
-	cin >> players;
-	while(players != 1 && players != 2)
-	{
-		cout << "Please input a correct amount of players." << endl << "How many players? (1 or 2): ";
-		cin >> players;
+		return out;
 	}
-	cout << endl;
-	Clobber game;
-	while(!game.winner())
-	{
-		cout << game << endl << (game.player() == RED ? "Red" : "Blue") << " player's move: ";
-		try
-		{
-			if(players == 1 && game.player() == BLUE)
-			{
-				game = pmcgs(game, 1000);
-				cout << endl;
-			}
-			else
-			{
-				string move;
-				cin >> move;
-				game = move == "best" ? pmcgs(game, 1000) : game.do_move(move);
-			}
-			cout << endl;
-		}
-		catch(const exception &e)
-		{
-			cout << e.what() << endl << endl;
-		}
-	}
-	cout << game << endl << (game.winner() == RED ? "Red" : "Blue") << " player wins!" << endl;
-	return 0;
 }
