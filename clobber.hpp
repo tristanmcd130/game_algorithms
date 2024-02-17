@@ -9,7 +9,7 @@ namespace Clobber
 	{
 		public:
 			Game();
-			void do_move(const std::string &move);
+			void do_move(const std::string &);
 			std::vector<std::string> moves() const;
 			int player() const;
 			int winner() const;
