@@ -6,7 +6,7 @@ Simply include pmcgs.hpp in your .cpp files.
 
 The class used as the template parameter to the pmcgs function needs a few methods implemented:
 - void do_move(string move): Makes the given move.
-- vector<string> moves() const: Returns all the possible moves the current player can make.
+- vector\<string\> moves() const: Returns all the possible moves the current player can make.
 - int player() const: Returns the current player.
 - int winner() const: Returns 0 if nobody has won the game, otherwise the number of the player who won.
 
