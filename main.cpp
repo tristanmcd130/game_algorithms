@@ -12,24 +12,24 @@ int main(int argc, char *argv[])
 		std::cin >> players;
 	}
 	//std::cout << std::endl;
-	Clobber::Game game;
-	while(!game.winner())
+	auto game = std::make_shared<Clobber::Game>();
+	while(!game->winner())
 	{
-		std::cout << game << (game.player() == 1 ? "Red" : "Blue") << " player's move: " << std::flush;
+		std::cout << *game << (game->player() == 1 ? "Red" : "Blue") << " player's move: " << std::flush;
 		try
 		{
 			std::string move;
-			if(players == 1 && game.player() == -1)
+			if(players == 1 && game->player() == -1)
 			{
 				move = PMCGS::pmcgs(game, 1000);
 				std::cout << move << std::endl;
-				game.do_move(move);
+				game->do_move(move);
 				//std::cout << std::endl;
 			}
 			else
 			{
 				std::cin >> move;
-				game.do_move(move == "best" ? PMCGS::pmcgs(game, 1000) : move);
+				game->do_move(move == "best" ? PMCGS::pmcgs(game, 1000) : move);
 			}
 			//std::cout << std::endl;
 		}
@@ -38,6 +38,6 @@ int main(int argc, char *argv[])
 			std::cout << e.what() << std::endl;
 		}
 	}
-	std::cout << game << (game.winner() == 1 ? "Red" : "Blue") << " player wins!" << std::endl;
+	std::cout << *game << (game->winner() == 1 ? "Red" : "Blue") << " player wins!" << std::endl;
 	return 0;
 }

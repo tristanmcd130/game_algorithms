@@ -54,6 +54,17 @@ namespace Clobber
 	{
 		return moves().size() > 0 ? 0 : -_player;
 	}
+	std::shared_ptr<PMCGS::Game> Game::copy() const
+	{
+		auto copy_ptr = std::make_shared<Game>();
+		for(int y = 0; y < 6; y++)
+		{
+			for(int x = 0; x < 5; x++)
+				copy_ptr->_board[y][x] = _board[y][x];
+		}
+		copy_ptr->_player = _player;
+		return copy_ptr;
+	}
 	std::ostream &operator<<(std::ostream &out, const Game &game)
 	{
 		out << "\x1B[1m  1 2 3 4 5" << std::endl;

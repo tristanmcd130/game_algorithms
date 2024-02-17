@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = --std=c++17 -Wall -Werror -pedantic -g -O3 -march=native
 DEPS = pmcgs.hpp clobber.hpp
-OBJECTS = main.o clobber.o
+OBJECTS = main.o pmcgs.o clobber.o
 
 .PHONY: all clean
 
